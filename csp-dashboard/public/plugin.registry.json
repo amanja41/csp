@@ -1,0 +1,11 @@
+{
+  "remotes": [
+    {
+      "name": "csp-ciam-plugins",
+      "entry": "http://localhost:4173/assets/remoteEntry.js",
+      "plugins": [
+        "csp-ciam-plugins/customer-search"
+      ]
+    }
+  ]
+}
