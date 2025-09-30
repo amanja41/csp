@@ -12,7 +12,7 @@ export default defineConfig({
         './customer-search': './plugins/customer-search/register.tsx',
         './customer-timeline': './plugins/customer-timeline/register.tsx',
       },
-      shared: ['react', 'react-dom'],
+      shared: ['react', 'react-dom', 'react-router-dom'],
     }),
   ],
   build: {

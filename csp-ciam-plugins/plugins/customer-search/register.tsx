@@ -1,6 +1,6 @@
 import { register } from 'csp-plugin';
 
-import { CustomerSearchPage } from './CustomerSearchPage';
+import { AdvanceSearchBar } from './AdvanceSearchBar';
 
 const manifest = register({
   name: 'customer-search',
@@ -9,7 +9,7 @@ const manifest = register({
   // },
   slots: {
     'shell-main-header': {
-      component: CustomerSearchPage,
+      component: AdvanceSearchBar,
     },
   },
 });

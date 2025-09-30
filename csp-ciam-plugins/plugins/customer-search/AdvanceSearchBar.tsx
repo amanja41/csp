@@ -1,37 +1,15 @@
-import './CustomerSearchPage.css';
+import './AdvanceSearchBar.css';
 
 import { Search } from '@avantfinco/tapestry/icons';
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import { searchCustomers } from '../services/customer-search';
-import { useDebounce } from './useDebounce';
 import { Customer } from '../models/customer';
+import { searchCustomers } from '../services/customer-search';
+import { CompactCustomerItem } from './CompactCustomerItem';
+import { useDebounce } from './useDebounce';
 
-interface SearchResult {
-  id: string;
-  name: string;
-  username?: string;
-  type: 'member' | 'fleet' | 'warehouse';
-  status?: string;
-  percentage?: number;
-  location?: string;
-}
-
-const mockData: SearchResult[] = [];
-
-function CompactCustomerItem({ customer }: { customer: Customer }) {
-  return (
-    <div>
-      <div>{customer.full_name}</div>
-      <div>
-        {customer.basic_customer_id} - {customer.email} - {customer.ssn_last_4}
-      </div>
-      <div>{customer.basic_orig_ids.map(id => id.toString()).join(', ')}</div>
-    </div>
-  );
-}
-
-export function CustomerSearchPage() {
+export function AdvanceSearchBar() {
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
@@ -42,17 +20,7 @@ export function CustomerSearchPage() {
   const [showResults, setShowResults] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const filteredResults = mockData.filter(item => {
-    const matchesSearch =
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (item.username && item.username.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesFilter = activeFilter === 'all' || item.type === activeFilter;
-    return matchesSearch && matchesFilter;
-  });
-
-  const memberResults = filteredResults.filter(item => item.type === 'member');
-  const fleetResults = filteredResults.filter(item => item.type === 'fleet');
-  const warehouseResults = filteredResults.filter(item => item.type === 'warehouse');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -94,10 +62,10 @@ export function CustomerSearchPage() {
     setShowResults(true);
   };
 
-  const handleSearchBlur = () => {
-    setIsSearchFocused(false);
-    // Delay hiding results to allow for clicks
-    setTimeout(() => setShowResults(false), 150);
+  const selectCustomer = (customer: Customer) => {
+    setShowResults(false);
+    setSearchQuery('');
+    navigate(`/customer-timeline/${customer.basic_customer_id}`);
   };
 
   return (
@@ -170,7 +138,7 @@ export function CustomerSearchPage() {
               </div>
               <div className="results-list">
                 {customers.map(customer => (
-                  <CompactCustomerItem key={customer.basic_customer_id} customer={customer} />
+                  <CompactCustomerItem onSelect={selectCustomer} key={customer.basic_customer_id} customer={customer} />
                 ))}
               </div>
             </div>
@@ -182,7 +150,7 @@ export function CustomerSearchPage() {
             <div className="results-section">
               <div className="section-header">
                 <span className="section-title">Recent Customers</span>
-                <span className="section-count">{memberResults.length}</span>
+                <span className="section-count">0</span>
               </div>
               <div className="results-list">
                 <div className="no-results">

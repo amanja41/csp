@@ -11,7 +11,7 @@ export default defineConfig({
       remotes: {
         'csp-ciam-plugins': 'http://localhost:4173/assets/remoteEntry.js',
       },
-      shared: ['react', 'react-dom'],
+      shared: ['react', 'react-dom', 'react-router-dom'],
     }),
   ],
   resolve: {

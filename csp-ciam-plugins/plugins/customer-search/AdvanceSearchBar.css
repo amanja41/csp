@@ -188,36 +188,26 @@ kbd {
 }
 
 /* Member Items */
-.member-item {
-  gap: 12px;
-}
-
-.member-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #3b82f6;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 14px;
+.customer-item {
+  gap: 4px;
+  flex-direction: column;
+  justify-content: start;
+  font-size: 12px;
 }
 
 .member-info {
   flex: 1;
 }
 
-.member-name {
+.customer-name {
   font-weight: 500;
   color: #111827;
   font-size: 14px;
 }
 
-.member-username {
+.customer-email {
   color: #6b7280;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .select-button {
