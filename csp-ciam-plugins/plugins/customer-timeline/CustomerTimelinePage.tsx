@@ -3,18 +3,36 @@ import './CustomerTimelinePage.css';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { getCustomerTimeline, TimelineEvent, TimelineResponse } from '../services/customer-timeline';
+import { getCustomerTimeline, TimelineEvent, TimelineResponse, ActivityEventData } from '../services/customer-timeline';
+
+interface FilterState {
+  eventTypes: Set<string>;
+  subtype: string;
+  dateRange: string;
+  pins: string;
+}
 
 interface TimelineCardProps {
   event: TimelineEvent;
 }
 
 interface EmailEventData {
+  uuid?: string;
   delivery_status?: string;
   delivered?: boolean;
   bounced?: boolean;
   subject?: string;
   direction?: string;
+  email_uri?: string;
+  bounced_at?: string | null;
+  meta?: {
+    email?: string;
+    mailer_class?: string;
+    mailer_template?: string;
+    customer_application_uuid?: string;
+    product_type?: string;
+    product_uuid?: string;
+  };
 }
 
 interface ItemEventData {
@@ -63,6 +81,192 @@ interface VersionEventData {
     confirmed_fields?: string[];
   };
   has_details?: boolean;
+}
+
+function EmailEventCard({ emailData }: { emailData: EmailEventData }) {
+  const getStatusColor = (status?: string, delivered?: boolean) => {
+    if (delivered) return 'success';
+    if (status === 'Bounced') return 'error';
+    return 'neutral';
+  };
+
+  const getDirectionLabel = (direction?: string) => {
+    return direction === 'outbound' ? 'Sent' : direction === 'inbound' ? 'Received' : direction || 'Unknown';
+  };
+
+  return (
+    <div className="email-event-content">
+      <div className="email-sections">
+        <div className="email-section">
+          <h4 className="email-section-title">Email Details</h4>
+          <div className="email-details-grid">
+            <div className="email-detail-item">
+              <span className="detail-label">Subject:</span>
+              <span className="detail-value primary">{emailData.subject || 'N/A'}</span>
+            </div>
+            <div className="email-detail-item">
+              <span className="detail-label">Direction:</span>
+              <span className={`detail-value status-badge ${emailData.direction}`}>
+                {getDirectionLabel(emailData.direction)}
+              </span>
+            </div>
+            <div className="email-detail-item">
+              <span className="detail-label">Status:</span>
+              <span
+                className={`detail-value status-badge ${getStatusColor(emailData.delivery_status, emailData.delivered)}`}
+              >
+                {emailData.delivery_status || 'Unknown'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="email-section">
+          <h4 className="email-section-title">Status Flags</h4>
+          <div className="status-flags">
+            <div className="status-flag">
+              <span className="flag-icon">{emailData.delivered ? '✅' : '❌'}</span>
+              <span className="flag-label">{emailData.delivered ? 'Delivered' : 'Not Delivered'}</span>
+            </div>
+            {emailData.bounced && (
+              <div className="status-flag error">
+                <span className="flag-icon">⚠️</span>
+                <span className="flag-label">Bounced</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {emailData.meta && (
+          <div className="email-section">
+            <h4 className="email-section-title">Additional Information</h4>
+            <div className="email-meta-grid">
+              {emailData.meta.email && (
+                <div className="meta-item">
+                  <span className="meta-label">Email</span>
+                  <span className="meta-value">{emailData.meta.email}</span>
+                </div>
+              )}
+              {emailData.meta.mailer_class && (
+                <div className="meta-item">
+                  <span className="meta-label">Mailer Class</span>
+                  <span className="meta-value">{emailData.meta.mailer_class}</span>
+                </div>
+              )}
+              {emailData.meta.mailer_template && (
+                <div className="meta-item">
+                  <span className="meta-label">Mailer Template</span>
+                  <span className="meta-value">{emailData.meta.mailer_template}</span>
+                </div>
+              )}
+              {emailData.meta.customer_application_uuid && (
+                <div className="meta-item">
+                  <span className="meta-label">Customer Application Uuid</span>
+                  <span className="meta-value uuid">{emailData.meta.customer_application_uuid.slice(0, 8)}...</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ActivityEventCard({ activityData }: { activityData: ActivityEventData }) {
+  const formatProductType = (productType: string) => {
+    return productType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  const getStatusColor = (status: string) => {
+    if (status.includes('approved')) return 'success';
+    if (status.includes('open')) return 'primary';
+    if (status.includes('pending')) return 'warning';
+    if (status.includes('rejected') || status.includes('declined')) return 'error';
+    return 'neutral';
+  };
+
+  return (
+    <div className="activity-event-content">
+      {/* Activity Header */}
+      <div className="activity-header">
+        <div className="activity-title-row">
+          <span className="activity-title">Account Activity</span>
+          {activityData.summary.total_changes > 0 && (
+            <span className="changes-badge">{activityData.summary.total_changes} total changes</span>
+          )}
+        </div>
+      </div>
+
+      <div className="activity-sections">
+        {/* Applications Section */}
+        <div className="activity-section">
+          <div className="section-header">
+            <h4 className="activity-section-title">Applications</h4>
+            <span className="section-count">
+              ({activityData.summary.applications.total} items • {activityData.summary.applications.changes} changes)
+            </span>
+          </div>
+
+          {/* Summary Stats */}
+          <div className="activity-stats">
+            <div className="stat-item">
+              <span className="stat-number">{activityData.summary.applications.status_changes?.length || 0}</span>
+              <span className="stat-label">Status Changes</span>
+            </div>
+            <div className="stat-item success">
+              <span className="stat-number">{activityData.summary.applications.added_items.length}</span>
+              <span className="stat-label">Items Added</span>
+            </div>
+          </div>
+
+          {/* Added Items */}
+          {activityData.summary.applications.added_items.length > 0 && (
+            <div className="added-items-section">
+              <div className="added-items-header">
+                <span className="added-icon">➕</span>
+                <span className="added-title">ADDED ( {activityData.summary.applications.added_items.length} )</span>
+              </div>
+
+              <div className="added-items-list">
+                {activityData.summary.applications.added_items.map(item => (
+                  <div key={item.uuid} className="added-item">
+                    <div className="item-info">
+                      <span className="item-id">{item.id}</span>
+                      <span className="item-type">{formatProductType(item.product_type)}</span>
+                    </div>
+                    <span className={`item-status-badge ${getStatusColor(item.status)}`}>
+                      {item.status.replace(/_/g, ' ')}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Change Details Section */}
+        {activityData.summary.change_details.length > 0 && (
+          <div className="activity-section">
+            <h4 className="activity-section-title">Change Details</h4>
+            <div className="change-details-list">
+              {activityData.summary.change_details.map((change, index) => (
+                <div key={`${change.uuid}-${index}`} className="change-detail-item">
+                  <div className="change-info">
+                    <span className="change-type-badge">{change.type.replace(/_/g, ' ')}</span>
+                    <span className="change-scope">{change.scope}</span>
+                  </div>
+                  <div className="change-meta">
+                    <span className="change-uuid">{change.uuid}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function VersionEventCard({ versionData }: { versionData: VersionEventData }) {
@@ -229,6 +433,26 @@ function VersionEventCard({ versionData }: { versionData: VersionEventData }) {
 }
 
 function TimelineCard({ event }: TimelineCardProps) {
+  const copyEventLink = async () => {
+    const eventAnchor = `#event-${event.id}`;
+    const fullUrl = `${window.location.origin}${window.location.pathname}${eventAnchor}`;
+
+    try {
+      await navigator.clipboard.writeText(fullUrl);
+      // You can add a toast notification here if needed
+      console.log('Event link copied to clipboard');
+    } catch (err) {
+      console.error('Failed to copy link:', err);
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = fullUrl;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    }
+  };
+
   const getCardClassName = () => {
     const baseClass = 'timeline-card';
     const priorityClass = event.metadata.priority ? `priority-${event.metadata.priority}` : '';
@@ -294,7 +518,7 @@ function TimelineCard({ event }: TimelineCardProps) {
   };
 
   return (
-    <div className="timeline-item">
+    <div className="timeline-item" id={`event-${event.id}`}>
       <div className="timeline-icon-container">
         <div className="timeline-icon">{getIconForEventType(event.type, event.sub_type)}</div>
         <div className="timeline-line"></div>
@@ -309,81 +533,83 @@ function TimelineCard({ event }: TimelineCardProps) {
               {event.sub_type && <span className="timeline-card-subtype">• {event.sub_type}</span>}
             </div>
           </div>
-          <div className="timeline-card-timestamp">
-            {(() => {
-              const { dateStr, timeStr } = formatTimestamp(event.timestamp);
-              return (
-                <>
-                  <div className="timestamp-date">{dateStr}</div>
-                  <div className="timestamp-time">{timeStr}</div>
-                </>
-              );
-            })()}
+          <div className="timeline-card-actions">
+            <button
+              className="copy-link-btn"
+              onClick={copyEventLink}
+              title="Copy link to this event"
+              aria-label="Copy link to this event"
+            >
+              🔗
+            </button>
+            <div className="timeline-card-timestamp">
+              {(() => {
+                const { dateStr, timeStr } = formatTimestamp(event.timestamp);
+                return (
+                  <>
+                    <div className="timestamp-date">{dateStr}</div>
+                    <div className="timestamp-time">{timeStr}</div>
+                  </>
+                );
+              })()}
+            </div>
           </div>
         </div>
 
         <div className="timeline-card-body">
           <p className="timeline-card-description">{event.description}</p>
+          {event.type === 'email_event' && event.data && <EmailEventCard emailData={event.data as EmailEventData} />}
           {event.type === 'version_event' && event.data && (
             <VersionEventCard versionData={event.data as VersionEventData} />
           )}
-          {event.type !== 'version_event' && Object.keys(event.data).length > 0 && (
-            <div className="timeline-card-data">
-              <h4>Event Details</h4>
-              <div className="timeline-card-data-grid">
-                {event.type === 'email_event' &&
-                  event.data &&
-                  typeof event.data === 'object' &&
-                  'delivery_status' in event.data && (
-                    <div className="timeline-card-data-item priority">
-                      <span className="data-key">Delivery Status:</span>
-                      <span
-                        className={`data-value ${(event.data as EmailEventData).delivered ? 'success' : 'warning'}`}
-                      >
-                        {String((event.data as EmailEventData).delivery_status)}
-                        {(event.data as EmailEventData).delivered ? ' ✅' : ''}
-                        {(event.data as EmailEventData).bounced ? ' ⚠️ Bounced' : ''}
-                      </span>
-                    </div>
-                  )}
-                {event.type === 'item_event' &&
-                  event.data &&
-                  typeof event.data === 'object' &&
-                  'summary' in event.data &&
-                  (event.data as ItemEventData).summary &&
-                  (event.data as ItemEventData).summary?.applications && (
-                    <div className="timeline-card-data-item priority">
-                      <span className="data-key">Applications:</span>
-                      <span className="data-value">
-                        {(event.data as ItemEventData).summary?.applications?.total} total
-                      </span>
-                    </div>
-                  )}
-                {event.type === 'version_event' &&
-                  event.data &&
-                  typeof event.data === 'object' &&
-                  'profile_id' in event.data && (
-                    <div className="timeline-card-data-item priority">
-                      <span className="data-key">Profile ID:</span>
-                      <span className="data-value">{String((event.data as VersionEventData).profile_id)}</span>
-                    </div>
-                  )}
-                {Object.entries(event.data)
-                  .filter(
-                    ([key]) => !['delivery_status', 'delivered', 'bounced', 'summary', 'profile_id'].includes(key)
-                  )
-                  .slice(0, 6)
-                  .map(([key, value]) => (
-                    <div key={key} className="timeline-card-data-item">
-                      <span className="data-key">{key.replace(/_/g, ' ')}:</span>
-                      <span className="data-value">
-                        {typeof value === 'object' ? JSON.stringify(value).slice(0, 50) + '...' : String(value)}
-                      </span>
-                    </div>
-                  ))}
+          {event.type === 'item_event' && event.sub_type === 'account_activity' && event.data && (
+            <ActivityEventCard activityData={event.data as unknown as ActivityEventData} />
+          )}
+          {event.type !== 'version_event' &&
+            event.type !== 'email_event' &&
+            !(event.type === 'item_event' && event.sub_type === 'account_activity') &&
+            Object.keys(event.data).length > 0 && (
+              <div className="timeline-card-data">
+                <h4>Event Details</h4>
+                <div className="timeline-card-data-grid">
+                  {event.type === 'item_event' &&
+                    event.data &&
+                    typeof event.data === 'object' &&
+                    'summary' in event.data &&
+                    (event.data as ItemEventData).summary &&
+                    (event.data as ItemEventData).summary?.applications && (
+                      <div className="timeline-card-data-item priority">
+                        <span className="data-key">Applications:</span>
+                        <span className="data-value">
+                          {(event.data as ItemEventData).summary?.applications?.total} total
+                        </span>
+                      </div>
+                    )}
+                  {event.type === 'version_event' &&
+                    event.data &&
+                    typeof event.data === 'object' &&
+                    'profile_id' in event.data && (
+                      <div className="timeline-card-data-item priority">
+                        <span className="data-key">Profile ID:</span>
+                        <span className="data-value">{String((event.data as VersionEventData).profile_id)}</span>
+                      </div>
+                    )}
+                  {Object.entries(event.data)
+                    .filter(
+                      ([key]) => !['delivery_status', 'delivered', 'bounced', 'summary', 'profile_id'].includes(key)
+                    )
+                    .slice(0, 6)
+                    .map(([key, value]) => (
+                      <div key={key} className="timeline-card-data-item">
+                        <span className="data-key">{key.replace(/_/g, ' ')}:</span>
+                        <span className="data-value">
+                          {typeof value === 'object' ? JSON.stringify(value).slice(0, 50) + '...' : String(value)}
+                        </span>
+                      </div>
+                    ))}
+                </div>
               </div>
-            </div>
-          )}{' '}
+            )}{' '}
           {event.pins.count > 0 && (
             <div className="timeline-card-pins">
               <div className="pins-indicator">
@@ -405,22 +631,138 @@ function TimelineCard({ event }: TimelineCardProps) {
   );
 }
 
-function CustomerSummary({ timelineData }: { timelineData: TimelineResponse['timeline_data'] }) {
+function FiltersHeader({
+  timelineData,
+  filters,
+  onFiltersChange,
+  filteredEventsCount,
+}: {
+  timelineData: TimelineResponse['timeline_data'];
+  filters: FilterState;
+  onFiltersChange: (filters: FilterState) => void;
+  filteredEventsCount: number;
+}) {
+  const getEventTypeCounts = () => {
+    const counts: Record<string, number> = {};
+    timelineData.events.forEach(event => {
+      const type = event.type;
+      counts[type] = (counts[type] || 0) + 1;
+    });
+    return counts;
+  };
+
+  const eventTypeCounts = getEventTypeCounts();
+
+  const toggleEventType = (eventType: string) => {
+    const newEventTypes = new Set(filters.eventTypes);
+    if (newEventTypes.has(eventType)) {
+      newEventTypes.delete(eventType);
+    } else {
+      newEventTypes.add(eventType);
+    }
+    onFiltersChange({ ...filters, eventTypes: newEventTypes });
+  };
+
+  const resetFilters = () => {
+    onFiltersChange({
+      eventTypes: new Set(),
+      subtype: 'all',
+      dateRange: 'all',
+      pins: 'all',
+    });
+  };
+
+  const getEventTypeDisplayName = (type: string) => {
+    const typeMap: Record<string, string> = {
+      item_event: 'Account',
+      version_event: 'Profile',
+      note_event: 'Notes',
+      email_event: 'Emails',
+    };
+    return typeMap[type] || type;
+  };
+
+  const getEventTypeColor = (type: string) => {
+    const colorMap: Record<string, string> = {
+      item_event: 'account',
+      version_event: 'profile',
+      note_event: 'notes',
+      email_event: 'emails',
+    };
+    return colorMap[type] || 'default';
+  };
+
   return (
-    <div className="customer-summary">
-      <h2>Customer Timeline - ID: {timelineData.customer_id}</h2>
-      <div className="summary-stats">
-        <div className="stat-item">
-          <span className="stat-value">{timelineData.events.length}</span>
-          <span className="stat-label">Total Events</span>
+    <div className="filters-header">
+      <div className="filters-title-row">
+        <h2 className="filters-title">Filters</h2>
+        <div className="filters-meta">
+          <span className="event-count">
+            {filteredEventsCount}/{timelineData.events.length} events
+          </span>
+          <button className="reset-btn" onClick={resetFilters}>
+            Reset
+          </button>
         </div>
-        <div className="stat-item">
-          <span className="stat-value">{timelineData.metadata.total_pins}</span>
-          <span className="stat-label">Total Pins</span>
+      </div>
+
+      <div className="filters-controls">
+        <div className="filter-section">
+          <label className="filter-label">Event Types</label>
+          <div className="event-type-pills">
+            {Object.entries(eventTypeCounts).map(([type, count]) => (
+              <button
+                key={type}
+                className={`event-type-pill ${getEventTypeColor(type)} ${filters.eventTypes.has(type) ? 'active' : ''}`}
+                onClick={() => toggleEventType(type)}
+              >
+                <span className="pill-dot"></span>
+                <span className="pill-label">{getEventTypeDisplayName(type)}</span>
+                <span className="pill-count">{count}</span>
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="stat-item">
-          <span className="stat-value">{timelineData.metadata.active_pins}</span>
-          <span className="stat-label">Active Pins</span>
+
+        <div className="filter-section">
+          <label className="filter-label">Subtypes</label>
+          <select
+            className="filter-select"
+            value={filters.subtype}
+            onChange={e => onFiltersChange({ ...filters, subtype: e.target.value })}
+          >
+            <option value="all">All Subtypes</option>
+            <option value="account_activity">Account Activity</option>
+            <option value="profile_update">Profile Update</option>
+            <option value="outbound_email">Outbound Email</option>
+          </select>
+        </div>
+
+        <div className="filter-section">
+          <label className="filter-label">Date</label>
+          <select
+            className="filter-select"
+            value={filters.dateRange}
+            onChange={e => onFiltersChange({ ...filters, dateRange: e.target.value })}
+          >
+            <option value="all">All Time</option>
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+          </select>
+        </div>
+
+        <div className="filter-section">
+          <label className="filter-label">Pins</label>
+          <select
+            className="filter-select"
+            value={filters.pins}
+            onChange={e => onFiltersChange({ ...filters, pins: e.target.value })}
+          >
+            <option value="all">All</option>
+            <option value="pinned">Pinned Only</option>
+            <option value="unpinned">Unpinned Only</option>
+          </select>
         </div>
       </div>
     </div>
@@ -432,6 +774,68 @@ export function CustomerTimelinePage() {
   const [timelineData, setTimelineData] = useState<TimelineResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<FilterState>({
+    eventTypes: new Set(),
+    subtype: 'all',
+    dateRange: 'all',
+    pins: 'all',
+  });
+
+  const filterEvents = (events: TimelineEvent[]) => {
+    return events.filter(event => {
+      // Event type filter
+      if (filters.eventTypes.size > 0 && !filters.eventTypes.has(event.type)) {
+        return false;
+      }
+
+      // Subtype filter
+      if (filters.subtype !== 'all' && event.sub_type !== filters.subtype) {
+        return false;
+      }
+
+      // Date filter
+      if (filters.dateRange !== 'all') {
+        const eventDate = new Date(event.timestamp);
+        const now = new Date();
+
+        switch (filters.dateRange) {
+          case 'today': {
+            if (eventDate.toDateString() !== now.toDateString()) {
+              return false;
+            }
+            break;
+          }
+          case 'week': {
+            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            if (eventDate < weekAgo) {
+              return false;
+            }
+            break;
+          }
+          case 'month': {
+            const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+            if (eventDate < monthAgo) {
+              return false;
+            }
+            break;
+          }
+        }
+      }
+
+      // Pins filter
+      if (filters.pins !== 'all') {
+        const isPinned = event.pins.is_pinned;
+        if (filters.pins === 'pinned' && !isPinned) {
+          return false;
+        }
+        if (filters.pins === 'unpinned' && isPinned) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  };
 
   useEffect(() => {
     if (customerId) {
@@ -490,19 +894,25 @@ export function CustomerTimelinePage() {
   }
 
   const { timeline_data } = timelineData;
+  const filteredEvents = filterEvents(timeline_data.events);
 
   return (
     <div className="timeline-container">
-      <CustomerSummary timelineData={timeline_data} />
+      <FiltersHeader
+        timelineData={timeline_data}
+        filters={filters}
+        onFiltersChange={setFilters}
+        filteredEventsCount={filteredEvents.length}
+      />
 
       <div className="timeline-events">
-        {timeline_data.events.length === 0 ? (
+        {filteredEvents.length === 0 ? (
           <div className="no-events">
-            <p>No timeline events found for this customer.</p>
+            <p>No timeline events match the current filters.</p>
           </div>
         ) : (
           <div className="timeline-container-inner">
-            {timeline_data.events.map(event => (
+            {filteredEvents.map(event => (
               <TimelineCard key={event.id} event={event} />
             ))}
           </div>

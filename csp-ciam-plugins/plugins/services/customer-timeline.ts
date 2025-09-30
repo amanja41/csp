@@ -47,6 +47,83 @@ export interface TimelineEvent {
   };
 }
 
+export interface ActivityEventData {
+  item_id: number;
+  item_data: {
+    'basic.orig.installment': unknown[];
+    'basic.orig.refinance': unknown[];
+    'basic.orig.credit_card': unknown[];
+    'basic.serv.loan': unknown[];
+    'basic.serv.credit_card_account': unknown[];
+  };
+  item_changes: Array<{
+    change_type: string;
+    uuid: string;
+    item: {
+      id: number;
+      uuid: string;
+      status: string;
+      type: string;
+      product_type: string;
+      partner_name: string;
+      partner_uuid: string;
+      source: string;
+      customer: {
+        id: number;
+        uuid: string;
+        email: string;
+        status: string;
+      };
+      product: {
+        id: number;
+        uuid: string;
+        status: string;
+        type: string;
+        product_type: string;
+      };
+    };
+    scope: string;
+  }>;
+  summary: {
+    applications: {
+      total: number;
+      changes: number;
+      status_changes: unknown[];
+      added_items: Array<{
+        id: number;
+        uuid: string;
+        status: string;
+        product_type: string;
+        scope: string;
+        product: {
+          id: number;
+          uuid: string;
+          status: string;
+          type: string;
+          product_type: string;
+        };
+      }>;
+      removed_items: unknown[];
+      unchanged_items: unknown[];
+    };
+    funded_items: {
+      total: number;
+      changes: number;
+      loans: unknown[];
+      credit_cards: unknown[];
+    };
+    total_changes: number;
+    change_details: Array<{
+      type: string;
+      scope: string;
+      uuid: string;
+      item: unknown;
+      before_status: string | null;
+      after_status: string | null;
+    }>;
+  };
+}
+
 export async function getCustomerTimeline(customerId: string | undefined): Promise<TimelineResponse | null> {
   if (!customerId) return null;
   try {
