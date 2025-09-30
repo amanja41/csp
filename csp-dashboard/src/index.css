@@ -1,0 +1,41 @@
+html,
+body {
+  background: var(--color-gray-100, #f5f7f8);
+  color: var(--color-navy-800, #2a2a3f);
+}
+
+body {
+  font-family: CeraPro, 'CeraProRegular', sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: CeraPro, 'CeraProBold', sans-serif;
+}
+
+.no-scroll {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  touch-action: none;
+}
+
+#root {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: inherit;
+}

@@ -14,6 +14,7 @@
     "watch": "vite build --watch & vite preview"
   },
   "dependencies": {
+    "@avantfinco/tapestry": "^2.65.0",
     "csp-plugin": "file:../csp-plugin",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"

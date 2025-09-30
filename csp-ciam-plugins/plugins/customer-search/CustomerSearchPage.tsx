@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState } from 'react';
+import { TapestryButton } from '@avantfinco/tapestry';
+import './CustomerSearchPage.css';
 
 export function CustomerSearchPage() {
   const [counter, setCounter] = useState(0);
@@ -7,10 +9,10 @@ export function CustomerSearchPage() {
     setCounter(counter + 1);
   };
   return (
-    <div>
+    <div className="CustomerSearchPage">
       Customer Search Page
       <div>Counter: {counter}</div>
-      <button onClick={increment}>Increment</button>
+      <TapestryButton onClick={increment} label="Increment" />
     </div>
   );
 }

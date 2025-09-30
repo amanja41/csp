@@ -1,7 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
-import { DashboardLayout } from './DashboardLayout';
-import { usePlugins } from './plugins/usePlugins';
+import { Layout } from './Layout/Layout';
+import { usePlugins } from './PluginRegistry/usePlugins';
 
 export function AppRouter() {
   const { plugins } = usePlugins();
@@ -12,7 +12,7 @@ export function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<DashboardLayout />}>
+        <Route path="/" element={<Layout />}>
           {Object.entries(routes).map(([path, Component]) => {
             const RouteComponent = Component as React.ComponentType;
             return RouteComponent ? <Route key={path} path={path} element={<RouteComponent />} /> : null;

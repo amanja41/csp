@@ -1,0 +1,29 @@
+.Support {
+  padding: 16px;
+  background-color: var(--color-bg-canvas, #f5f7f8);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-space-between-16);
+  border-radius: var(--border-radius-default);
+
+  h6 {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--color--fg-muted, #505053);
+  }
+
+  button {
+    text-wrap: wrap;
+    text-transform: none;
+    height: auto;
+    font-size: 14px;
+    line-height: 20px;
+  }
+}
