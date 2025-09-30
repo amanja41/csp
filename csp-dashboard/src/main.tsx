@@ -7,14 +7,14 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { App } from './App.tsx';
-import { loadRemotesPlugins } from './PluginRegistry/plugin.tsx';
-import { PluginProvider } from './PluginRegistry/PluginProvider.tsx';
+import { loadRemotesPlugins } from './Plugin/index.tsx';
+import { PluginProvider } from './Plugin/PluginProvider.tsx';
 
-const plugins = await loadRemotesPlugins();
+await loadRemotesPlugins();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <PluginProvider initialPlugins={plugins}>
+    <PluginProvider initialPlugins={[]}>
       <App />
     </PluginProvider>
   </StrictMode>

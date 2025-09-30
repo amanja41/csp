@@ -1,7 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import { Layout } from './Layout/Layout';
-import { usePlugins } from './PluginRegistry/usePlugins';
+import { usePlugins } from './Plugin/usePlugins';
 
 export function AppRouter() {
   const { plugins } = usePlugins();

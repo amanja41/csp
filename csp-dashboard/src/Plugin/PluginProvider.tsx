@@ -1,5 +1,5 @@
 import { type Plugin } from 'csp-plugin';
-import { useCallback, useMemo, useState } from 'react';
+import { type ComponentType, useCallback, useMemo, useState } from 'react';
 
 import { PluginContext } from './PluginContext';
 
@@ -18,16 +18,17 @@ export function PluginProvider({ children, initialPlugins = {} }: PluginProvider
   const [plugins] = useState<Record<string, Plugin>>(() => {
     // Merge initial plugins with any plugins already registered on window
     const windowPlugins = typeof window !== 'undefined' ? window.plugins || {} : {};
-    return { ...initialPlugins, ...windowPlugins };
+    Object.assign(windowPlugins, initialPlugins);
+    return { ...windowPlugins };
   });
 
   const getSlotComponents = useCallback(
     (slotName: string) => {
-      const components: React.ComponentType[] = [];
+      const components: ComponentType[] = [];
 
       Object.values(plugins).forEach(plugin => {
         const slotComponents = plugin.slots[slotName];
-        if (slotComponents) {
+        if (slotComponents && Array.isArray(slotComponents)) {
           components.push(...slotComponents);
         }
       });

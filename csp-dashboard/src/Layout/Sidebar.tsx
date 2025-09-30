@@ -1,5 +1,7 @@
 import { Logo } from '@avantfinco/tapestry/icons';
-import { Support } from '@plugins';
+
+import { Slot } from '../Plugin/Slot';
+
 export function Sidebar() {
   return (
     <aside id="shell-sidebar" className="shell-sidebar">
@@ -8,7 +10,7 @@ export function Sidebar() {
       </header>
       <main id="shell-sidebar-content"></main>
       <footer id="shell-sidebar-footer">
-        <Support />
+        <Slot name="shell-sidebar-footer" />
       </footer>
     </aside>
   );

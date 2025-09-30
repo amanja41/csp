@@ -2,6 +2,7 @@ import './Layout.css';
 
 import { Outlet } from 'react-router-dom';
 
+import { Slot } from '../Plugin/Slot';
 import { Sidebar } from './Sidebar';
 
 export function Layout() {
@@ -9,7 +10,9 @@ export function Layout() {
     <div id="shell" className="shell">
       <Sidebar />
       <section id="shell-main">
-        <header id="shell-main-header">header</header>
+        <header id="shell-main-header">
+          <Slot name="shell-main-header" />
+        </header>
         <main id="shell-main-content">
           <Outlet />
         </main>

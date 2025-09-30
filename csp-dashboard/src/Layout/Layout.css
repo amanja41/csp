@@ -47,8 +47,8 @@
 
 #shell-main-header {
   display: flex;
-  height: 64px;
-  padding: var(--spacing-space-around-24);
+  height: fit-content;
+  padding: var(--spacing-space-around-8);
   align-items: center;
   gap: 24px;
   background-color: var(--color-bg-muted, #f5f7f8);

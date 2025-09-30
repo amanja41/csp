@@ -1,18 +1,13 @@
-import { register } from "csp-plugin";
-import {
-  CustomerTimelinePage,
-  CustomerTimelineWidget,
-} from "./CustomerTimelinePage";
+import { register } from 'csp-plugin';
+
+import { CustomerTimelinePage } from './CustomerTimelinePage';
 
 const manifest = register({
-  name: "customer-timeline",
+  name: 'customer-timeline',
   routes: {
-    "customer-timeline": CustomerTimelinePage,
+    'customer-timeline': CustomerTimelinePage,
   },
-  slots: {
-    sidebar: [CustomerTimelineWidget],
-    header: [],
-  },
+  slots: {},
 });
 
 export default manifest;
