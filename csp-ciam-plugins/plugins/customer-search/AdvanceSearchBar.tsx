@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Customer } from '../models/customer';
-import { searchCustomers } from '../services/customer-search';
+import { searchCustomers, SearchType } from '../services/customer-search';
 import { CompactCustomerItem } from './CompactCustomerItem';
 import { useDebounce } from './useDebounce';
 
@@ -16,6 +16,7 @@ export function AdvanceSearchBar() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchType, setSearchType] = useState<SearchType>('name'); // Default to name search
 
   const [activeFilter, setActiveFilter] = useState<'all' | 'customer_id' | 'application_id' | 'ssn' | 'ssn_last_4'>(
     'all'
@@ -54,7 +55,7 @@ export function AdvanceSearchBar() {
     const controller = new AbortController();
     setIsLoading(true);
 
-    searchCustomers(debouncedSearchQuery, controller.signal)
+    searchCustomers(debouncedSearchQuery, controller.signal, searchType)
       .then(data => {
         setCustomers(data);
         setIsLoading(false);
@@ -69,7 +70,7 @@ export function AdvanceSearchBar() {
     return () => {
       controller.abort();
     };
-  }, [debouncedSearchQuery]);
+  }, [debouncedSearchQuery, searchType]);
 
   // Filter customers based on active filter
   useEffect(() => {
@@ -101,6 +102,42 @@ export function AdvanceSearchBar() {
     setShowResults(true);
   };
 
+  const getPlaceholderText = () => {
+    switch (searchType) {
+      case 'customer_id':
+        return 'Search by Customer ID...';
+      case 'application_id':
+        return 'Search by Application ID...';
+      case 'email':
+        return 'Search by Email...';
+      case 'phone':
+        return 'Search by Phone Number...';
+      case 'ssn':
+        return 'Search by SSN Last 4...';
+      case 'name':
+      default:
+        return 'Search by Customer Name...';
+    }
+  };
+
+  const getSearchTypeLabel = (type: SearchType) => {
+    switch (type) {
+      case 'customer_id':
+        return 'Customer ID';
+      case 'application_id':
+        return 'Application ID';
+      case 'email':
+        return 'Email';
+      case 'phone':
+        return 'Phone';
+      case 'ssn':
+        return 'SSN Last 4';
+      case 'name':
+      default:
+        return 'Name';
+    }
+  };
+
   const selectCustomer = (customer: Customer) => {
     setShowResults(false);
     setSearchQuery('');
@@ -118,11 +155,10 @@ export function AdvanceSearchBar() {
           <input
             ref={searchInputRef}
             type="text"
-            placeholder="Search..."
+            placeholder={getPlaceholderText()}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             onFocus={handleSearchFocus}
-            // onBlur={handleSearchBlur}
             className="search-input"
           />
           <div className="search-shortcuts">
@@ -135,6 +171,28 @@ export function AdvanceSearchBar() {
             <kbd className="close-key">esc</kbd>
           </div>
         </div>
+
+        {/* Search Type Buttons */}
+        {showResults && (
+          <div className="search-type-buttons">
+            <div className="search-type-label">Search by:</div>
+            {(['name', 'customer_id', 'application_id', 'email', 'phone', 'ssn'] as SearchType[]).map(type => (
+              <button
+                key={type}
+                className={`search-type-button ${searchType === type ? 'active' : ''}`}
+                onClick={() => {
+                  setSearchType(type);
+                  // Clear search when changing type to avoid confusion
+                  if (searchQuery) {
+                    setSearchQuery('');
+                  }
+                }}
+              >
+                {getSearchTypeLabel(type)}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Filter Buttons */}
         {showResults && debouncedSearchQuery && (
@@ -210,11 +268,15 @@ export function AdvanceSearchBar() {
                 <div className="search-instructions">
                   <div className="instruction-item">
                     <span className="instruction-icon">🔍</span>
-                    <span>Search by name, email, customer ID, or application ID</span>
+                    <span>Choose a search type above, then start typing to search</span>
                   </div>
                   <div className="instruction-item">
-                    <span className="instruction-icon">📱</span>
-                    <span>Use filters to narrow down results</span>
+                    <span className="instruction-icon">🎯</span>
+                    <span>Search by: Name, Customer ID, Application ID, Email, Phone, or SSN</span>
+                  </div>
+                  <div className="instruction-item">
+                    <span className="instruction-icon">⚡</span>
+                    <span>Use filters to narrow down your results after searching</span>
                   </div>
                   <div className="instruction-item">
                     <span className="instruction-icon">⌨️</span>
