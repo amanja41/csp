@@ -8,5 +8,5 @@ export function register(plugin: Plugin): Plugin {
 
   return plugin;
 }
-console.log("csp-plugin loaded2222");
+
 export type { Plugin };

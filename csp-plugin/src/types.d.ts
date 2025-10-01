@@ -1,9 +1,16 @@
 import { ComponentType } from "react";
 
+export type Navigation = {
+  label: string;
+  position: "sidebar" | "none";
+  route: string;
+};
+
 export interface Plugin {
   name: string;
   routes: Record<string, ComponentType>;
   slots: Record<string, ComponentType[]>;
+  navigations: Navigation[];
 }
 
 export interface PluginContextType {

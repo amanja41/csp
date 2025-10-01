@@ -39,7 +39,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: var(--color-bg-overlay);
   color: white;
   display: flex;
   align-items: center;
@@ -55,7 +55,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: var(--color-bg-overlay);
   color: white;
   display: flex;
   align-items: center;
@@ -212,22 +212,4 @@
 
 .dropdown-item:hover svg {
   color: #374151;
-}
-
-/* Logout Item Special Styling */
-.logout-item {
-  color: #dc2626;
-}
-
-.logout-item:hover {
-  background: #fef2f2;
-  color: #dc2626;
-}
-
-.logout-item svg {
-  color: #dc2626;
-}
-
-.logout-item:hover svg {
-  color: #dc2626;
 }
