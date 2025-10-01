@@ -5,6 +5,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Layout } from './Layout/Layout';
 import { AuthCallback } from './pages/AuthCallback';
 import { LoginPage } from './pages/Login/LoginPage';
+import { Logout } from './pages/Logout';
 import { usePlugins } from './Plugin/usePlugins';
 
 function NotFound() {
@@ -22,6 +23,7 @@ export function AppRouter() {
       <Routes>
         <Route path="/404" element={<NotFound />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/logout" element={<Logout />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/" element={<Layout />}>
           {Object.entries(routes).map(([path, Component]) => {
