@@ -1,12 +1,14 @@
 import './AdvanceSearchBar.css';
 
-import { Search } from '@avantfinco/tapestry/icons';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Customer } from '../models/customer';
 import { searchCustomers, SearchType } from '../services/customer-search';
-import { CompactCustomerItem } from './CompactCustomerItem';
+import { FilterButtons } from './FilterButtons';
+import { SearchInput } from './SearchInput';
+import { SearchResults } from './SearchResults';
+import { SearchTypeButtons } from './SearchTypeButtons';
 import { useDebounce } from './useDebounce';
 
 export function AdvanceSearchBar() {
@@ -16,7 +18,7 @@ export function AdvanceSearchBar() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [searchType, setSearchType] = useState<SearchType>('name'); // Default to name search
+  const [searchType, setSearchType] = useState<SearchType>('customer_id');
 
   const [activeFilter, setActiveFilter] = useState<'all' | 'customer_id' | 'application_id' | 'ssn' | 'ssn_last_4'>(
     'all'
@@ -102,42 +104,6 @@ export function AdvanceSearchBar() {
     setShowResults(true);
   };
 
-  const getPlaceholderText = () => {
-    switch (searchType) {
-      case 'customer_id':
-        return 'Search by Customer ID...';
-      case 'application_id':
-        return 'Search by Application ID...';
-      case 'email':
-        return 'Search by Email...';
-      case 'phone':
-        return 'Search by Phone Number...';
-      case 'ssn':
-        return 'Search by SSN Last 4...';
-      case 'name':
-      default:
-        return 'Search by Customer Name...';
-    }
-  };
-
-  const getSearchTypeLabel = (type: SearchType) => {
-    switch (type) {
-      case 'customer_id':
-        return 'Customer ID';
-      case 'application_id':
-        return 'Application ID';
-      case 'email':
-        return 'Email';
-      case 'phone':
-        return 'Phone';
-      case 'ssn':
-        return 'SSN Last 4';
-      case 'name':
-      default:
-        return 'Name';
-    }
-  };
-
   const selectCustomer = (customer: Customer) => {
     setShowResults(false);
     setSearchQuery('');
@@ -148,147 +114,40 @@ export function AdvanceSearchBar() {
     <div className="customer-search-page">
       <div className="search-container">
         {/* Search Bar */}
-        <div className={`search-bar ${isSearchFocused ? 'focused' : ''}`}>
-          <div className="search-icon">
-            <Search width={16} />
-          </div>
-          <input
-            ref={searchInputRef}
-            type="text"
-            placeholder={getPlaceholderText()}
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            onFocus={handleSearchFocus}
-            className="search-input"
-          />
-          <div className="search-shortcuts">
-            <span className="shortcut-text">Navigate</span>
-            <div className="shortcut-keys">
-              <kbd>↑</kbd>
-              <kbd>↓</kbd>
-            </div>
-            <span className="close-text">Close</span>
-            <kbd className="close-key">esc</kbd>
-          </div>
-        </div>
+        <SearchInput
+          ref={searchInputRef}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          isSearchFocused={isSearchFocused}
+          onFocus={handleSearchFocus}
+          searchType={searchType}
+        />
 
         {/* Search Type Buttons */}
         {showResults && (
-          <div className="search-type-buttons">
-            <div className="search-type-label">Search by:</div>
-            {(['name', 'customer_id', 'application_id', 'email', 'phone', 'ssn'] as SearchType[]).map(type => (
-              <button
-                key={type}
-                className={`search-type-button ${searchType === type ? 'active' : ''}`}
-                onClick={() => {
-                  setSearchType(type);
-                  // Clear search when changing type to avoid confusion
-                  if (searchQuery) {
-                    setSearchQuery('');
-                  }
-                }}
-              >
-                {getSearchTypeLabel(type)}
-              </button>
-            ))}
-          </div>
+          <SearchTypeButtons
+            searchType={searchType}
+            setSearchType={setSearchType}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
         )}
 
         {/* Filter Buttons */}
         {showResults && debouncedSearchQuery && (
-          <div className="filter-buttons">
-            <button
-              className={`filter-button ${activeFilter === 'all' ? 'active' : ''}`}
-              onClick={() => setActiveFilter('all')}
-            >
-              All Results ({customers.length})
-            </button>
-            <button
-              className={`filter-button ${activeFilter === 'customer_id' ? 'active' : ''}`}
-              onClick={() => setActiveFilter('customer_id')}
-            >
-              Customer ID
-            </button>
-            <button
-              className={`filter-button ${activeFilter === 'application_id' ? 'active' : ''}`}
-              onClick={() => setActiveFilter('application_id')}
-            >
-              Application ID
-            </button>
-            <button
-              className={`filter-button ${activeFilter === 'ssn_last_4' ? 'active' : ''}`}
-              onClick={() => setActiveFilter('ssn_last_4')}
-            >
-              SSN Last 4
-            </button>
-          </div>
+          <FilterButtons activeFilter={activeFilter} setActiveFilter={setActiveFilter} customers={customers} />
         )}
 
         {/* Search Results */}
-        {showResults && (
-          <div className="search-results">
-            {debouncedSearchQuery ? (
-              <div className="results-section">
-                <div className="section-header">
-                  <span className="section-title">
-                    {activeFilter === 'all' ? 'Search Results' : `Filtered by ${activeFilter.replace('_', ' ')}`}
-                  </span>
-                  <span className="section-count">{filteredCustomers.length}</span>
-                </div>
-                <div className="results-list">
-                  {isLoading ? (
-                    <div className="loading-state">
-                      <div className="loading-spinner"></div>
-                      <div className="loading-text">Searching customers...</div>
-                    </div>
-                  ) : filteredCustomers.length > 0 ? (
-                    filteredCustomers.map(customer => (
-                      <CompactCustomerItem
-                        onSelect={selectCustomer}
-                        key={customer.basic_customer_id}
-                        customer={customer}
-                      />
-                    ))
-                  ) : customers.length > 0 ? (
-                    <div className="no-results">
-                      <div className="no-results-text">No customers match the selected filter "{activeFilter}"</div>
-                    </div>
-                  ) : (
-                    <div className="no-results">
-                      <div className="no-results-text">No customers found for "{debouncedSearchQuery}"</div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="results-section">
-                <div className="section-header">
-                  <span className="section-title">Start typing to search customers</span>
-                </div>
-                <div className="search-instructions">
-                  <div className="instruction-item">
-                    <span className="instruction-icon">🔍</span>
-                    <span>Choose a search type above, then start typing to search</span>
-                  </div>
-                  <div className="instruction-item">
-                    <span className="instruction-icon">🎯</span>
-                    <span>Search by: Name, Customer ID, Application ID, Email, Phone, or SSN</span>
-                  </div>
-                  <div className="instruction-item">
-                    <span className="instruction-icon">⚡</span>
-                    <span>Use filters to narrow down your results after searching</span>
-                  </div>
-                  <div className="instruction-item">
-                    <span className="instruction-icon">⌨️</span>
-                    <span>
-                      Press <kbd>Cmd+K</kbd> to quickly access search
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        <SearchResults
+          showResults={showResults}
+          debouncedSearchQuery={debouncedSearchQuery}
+          activeFilter={activeFilter}
+          filteredCustomers={filteredCustomers}
+          customers={customers}
+          isLoading={isLoading}
+          onSelectCustomer={selectCustomer}
+        />
       </div>
 
       {/* Overlay */}

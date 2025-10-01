@@ -55,7 +55,7 @@ export function CompactCustomerItem({
         {/* Customer Details */}
         <div className="customer-details">
           <div className="customer-contact">
-            <div className="customer-email">📧 {highlightMatchedField('email', customer.email)}</div>
+            <div className="customer-email">{highlightMatchedField('email', customer.email)}</div>
             {customer.phone_number && (
               <div className="customer-phone">
                 📞 {highlightMatchedField('phone_number', formatPhoneNumber(customer.phone_number))}
@@ -64,10 +64,10 @@ export function CompactCustomerItem({
           </div>
 
           {customer.company && (
-            <div className="customer-company">🏢 {highlightMatchedField('company', customer.company)}</div>
+            <div className="customer-company">{highlightMatchedField('company', customer.company)}</div>
           )}
 
-          <div className="customer-ssn">🆔 SSN: ***-**-{highlightMatchedField('ssn_last_4', customer.ssn_last_4)}</div>
+          <div className="customer-ssn">SSN: ***-**-{highlightMatchedField('ssn_last_4', customer.ssn_last_4)}</div>
         </div>
 
         {/* Applications and Services */}

@@ -1,0 +1,19 @@
+.container {
+  align-items: center;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  justify-content: center;
+  text-align: center;
+  gap: var(--spacing-space-between-32);
+}
+
+.decorations {
+  position: fixed;
+  top: 0;
+  right: 0;
+  pointer-events: none;
+  display: flex;
+  justify-content: space-between;
+}

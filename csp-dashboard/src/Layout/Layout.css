@@ -16,13 +16,17 @@
 }
 
 #shell-sidebar-header {
-  height: 64px;
+  min-height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: var(--font-size-3);
   font-weight: 600;
   color: var(--color-text-100, #fff);
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--spacing-space-around-16);
+  gap: 8px;
 }
 
 #shell-sidebar-content {
