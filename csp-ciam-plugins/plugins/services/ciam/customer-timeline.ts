@@ -1,3 +1,5 @@
+import { request } from './request';
+
 const API_BASE_URL = 'http://localhost:9292';
 
 export interface TimelineResponse {
@@ -127,18 +129,12 @@ export interface ActivityEventData {
 export async function getCustomerTimeline(customerId: string | undefined): Promise<TimelineResponse | null> {
   if (!customerId) return null;
   try {
-    const response = await fetch(`${API_BASE_URL}/csp/${customerId}/timeline_events`, {
+    const data = await request({
+      url: `${API_BASE_URL}/csp/${customerId}/timeline_events`,
+      body: {},
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
     return data;
   } catch (error) {
     console.error('Error fetching customer timeline:', error);

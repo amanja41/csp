@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Customer } from '../models/customer';
-import { searchCustomers, SearchType } from '../services/customer-search';
+import { searchCustomers, SearchType } from '../services/ciam/customer-search';
 import { FilterButtons } from './FilterButtons';
 import { SearchInput } from './SearchInput';
 import { SearchResults } from './SearchResults';

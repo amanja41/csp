@@ -3,7 +3,12 @@ import './CustomerTimelinePage.css';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { ActivityEventData,getCustomerTimeline, TimelineEvent, TimelineResponse } from '../services/customer-timeline';
+import {
+  ActivityEventData,
+  getCustomerTimeline,
+  TimelineEvent,
+  TimelineResponse,
+} from '../services/ciam/customer-timeline';
 
 interface FilterState {
   eventTypes: Set<string>;

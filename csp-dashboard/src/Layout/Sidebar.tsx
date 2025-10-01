@@ -6,7 +6,9 @@ export function Sidebar() {
   return (
     <aside id="shell-sidebar" className="shell-sidebar">
       <header id="shell-sidebar-header">
-        <Logo width={200} />
+        <a href="/">
+          <Logo width={200} />
+        </a>
       </header>
       <main id="shell-sidebar-content"></main>
       <footer id="shell-sidebar-footer">

@@ -1,4 +1,5 @@
-import { Customer } from '../models/customer';
+import { Customer } from '../../models/customer';
+import { request } from './request';
 
 const API_BASE_URL = 'http://localhost:9292';
 
@@ -15,21 +16,15 @@ export async function searchCustomers(query: string, signal?: AbortSignal, searc
     include_all_matches: true,
   };
 
-  const response = await fetch(`${API_BASE_URL}/csp/search`, {
+  const response = await request({
+    url: `${API_BASE_URL}/csp/search`,
+    body: payload,
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
     signal,
   });
 
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  const jsonResponse = await response.json();
-  const customers = jsonResponse.data.customers as Customer[];
+  const customers = response.data.customers as Customer[];
+  console.log('Fetched customers:', customers);
 
   // Add matched fields based on search type and query
   return customers.map(customer => ({
