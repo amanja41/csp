@@ -1,4 +1,4 @@
-import AgentDropDown from '@plugins/AgentDropDown/register';
+import AgentDropDown from '@plugins/AuthDropDown/register';
 import Support from '@plugins/Support/register';
 import { type Plugin } from 'csp-plugin';
 

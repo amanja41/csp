@@ -1,12 +1,12 @@
 import { register } from 'csp-plugin';
 
-import { AgentDropDown } from './AgentDropDown';
+import { AuthDropDown } from './AuthDropDown';
 
 const manifest = register({
   name: 'AgentDropDown',
   slots: {
     'shell-main-header-right': {
-      component: AgentDropDown,
+      component: AuthDropDown,
     },
   },
 });
