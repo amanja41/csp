@@ -14,7 +14,7 @@
   border: 1px solid #e1e5e9; */
   background: #f8f9fa;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   font-family: inherit;
   font-size: 14px;
@@ -113,7 +113,7 @@
   right: 0;
   background: #ffffff;
   border: 1px solid #e1e5e9;
-  border-radius: 4px;
+  border-radius: 8px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   min-width: 280px;
   z-index: 1000;
@@ -197,7 +197,7 @@
   width: 100%;
   text-align: left;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 8px;
 }
 
 .dropdown-item:hover {
