@@ -59,6 +59,16 @@
   border-bottom: 1px solid var(--color-border-default, #d5d9db);
 }
 
+#shell-main-header-left,
+#shell-main-header-right {
+  width: 50%;
+}
+
+#shell-main-header-right {
+  display: flex;
+  justify-content: flex-end;
+}
+
 #shell-main-content {
   padding: var(--spacing-space-around-24);
   flex: 1;

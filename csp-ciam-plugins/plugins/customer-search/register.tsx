@@ -8,7 +8,7 @@ const manifest = register({
   //   'customer-search': CustomerSearchPage,
   // },
   slots: {
-    'shell-main-header': {
+    'shell-main-header-left': {
       component: AdvanceSearchBar,
     },
   },

@@ -16,7 +16,6 @@ export function AppRouter() {
 
   const routesArray = plugins?.map(p => p.routes) ?? [];
   const routes = Object.assign({}, ...routesArray);
-  console.log('Routes:', routes);
 
   return (
     <BrowserRouter>

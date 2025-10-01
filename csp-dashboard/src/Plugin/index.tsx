@@ -1,3 +1,4 @@
+import AgentDropDown from '@plugins/AgentDropDown/register';
 import Support from '@plugins/Support/register';
 import { type Plugin } from 'csp-plugin';
 
@@ -10,5 +11,5 @@ export async function loadRemotesPlugins(remotesList = remotes) {
 }
 
 export function loadLocalPlugins() {
-  return [Support];
+  return [Support, AgentDropDown];
 }

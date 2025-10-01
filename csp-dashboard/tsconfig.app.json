@@ -39,6 +39,7 @@
     }
   },
   "include": [
-    "src"
+    "src",
+    "plugins/AgentDropDown/AgentDropDown.tsx"
   ]
 }
