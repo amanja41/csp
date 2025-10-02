@@ -6,11 +6,10 @@ export default defineConfig({
   plugins: [
     react(),
     federation({
-      name: 'ciam-plugins',
+      name: 'csp-origination-plugins',
       filename: 'remoteEntry.js',
       exposes: {
-        './customer-search': './plugins/customer-search/register.tsx',
-        './customer-timeline': './plugins/customer-timeline/register.tsx',
+        './application-details': './plugins/application-details/register.tsx',
       },
       shared: ['react', 'react-dom', 'react-router-dom'],
     }),

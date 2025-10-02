@@ -10,6 +10,7 @@ export default defineConfig({
       name: 'dashboard',
       remotes: {
         'csp-ciam-plugins': 'http://localhost:4173/assets/remoteEntry.js',
+        'csp-origination-plugins': 'http://localhost:4174/assets/remoteEntry.js',
       },
       shared: ['react', 'react-dom', 'react-router-dom'],
     }),
